@@ -5,6 +5,7 @@ import json
 import csv
 
 
+
 def load(path: str):
     """
     Load a CSV file and display its dimensions.
@@ -47,7 +48,7 @@ def normalize_data(data):
     min_val = min(data)
     max_val = max(data)
     range_val = max_val - min_val
-
+    
     normalized = [(x - min_val) / range_val for x in data]
     return normalized, min_val, max_val
 
@@ -64,12 +65,12 @@ def denormalize_theta(theta0, theta1, km_min, km_max, price_min, price_max):
     return real_theta0, real_theta1
 
 
-def train(mileages, prices, learning_rate=0.1, iteration=10000):
+def train(mileages, prices, learning_rate=0.1, iteration=1000):
     """doc"""
     # Normaliser les données
     norm_mileages, km_min, km_max = normalize_data(mileages)
     norm_prices, price_min, price_max = normalize_data(prices)
-
+    
     theta0 = 0.0
     theta1 = 0.0
     m = len(norm_mileages)
@@ -77,17 +78,15 @@ def train(mileages, prices, learning_rate=0.1, iteration=10000):
     print(f"Learning rate: {learning_rate}, Iterations: {iteration}")
     print(f"Mileage range: [{km_min:.0f}, {km_max:.0f}]")
     print(f"Price range: [{price_min:.0f}, {price_max:.0f}]\n")
-    theta0_evolution = []
-    theta1_evolution = []
-
+    
     for i in range(iteration):
         sum_error_theta0 = 0.0
         sum_error_theta1 = 0.0
-
+        
         for j in range(m):
             estimate_price = estimate_value(theta0, theta1, norm_mileages[j])
             error = estimate_price - norm_prices[j]
-
+            
             sum_error_theta0 += error
             sum_error_theta1 += error * norm_mileages[j]
 
@@ -96,26 +95,20 @@ def train(mileages, prices, learning_rate=0.1, iteration=10000):
 
         theta0 = theta0 - tmp_theta0
         theta1 = theta1 - tmp_theta1
-
+        
         # Debug: afficher tous les 200 itérations
-        if (i + 1) % 2000 == 0:
+        if (i + 1) % 200 == 0:
             print(f"Iteration {i + 1}: θ0 = {theta0:.6f}, θ1 = {theta1:.6f}")
-        if (i + 1) % 100 == 0:
-            real_theta0, real_theta1 = denormalize_theta(
-            theta0, theta1, km_min, km_max, price_min, price_max)
-            theta0_evolution.append(real_theta0)
-            theta1_evolution.append(real_theta1)
-
-
+    
     # Dénormaliser les theta pour les sauvegarder
     real_theta0, real_theta1 = denormalize_theta(
         theta0, theta1, km_min, km_max, price_min, price_max
     )
-
+    
     print(f"\nNormalized θ0 = {theta0:.6f}, θ1 = {theta1:.6f}")
     print(f"Denormalized θ0 = {real_theta0:.2f}, θ1 = {real_theta1:.6f}")
-
-    return real_theta0, real_theta1, theta0_evolution, theta1_evolution
+    
+    return real_theta0, real_theta1
 
 
 def save_theta(theta0, theta1, filepath='theta.json'):
@@ -134,12 +127,9 @@ def save_theta(theta0, theta1, filepath='theta.json'):
 def main():
     mileages, prices = load("data.csv")
     print(mileages, prices)
-    theta0, theta1, theta0_evolution, theta1_evolution = train(mileages, prices)
+    theta0, theta1 = train(mileages, prices)
     print(f"theta0 = {theta0}, theta1 = {theta1}")
     save_theta(theta0, theta1)
-    print(theta0_evolution)
-    print(theta1_evolution)
-
 
 
 if __name__ == "__main__":
