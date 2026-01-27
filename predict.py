@@ -1,5 +1,6 @@
 import json
 import os
+from utils import estimate_price
 
 
 def load_theta():
@@ -15,11 +16,6 @@ def load_theta():
             return data['theta0'], data['theta1']
     except (json.JSONDecodeError, KeyError):
         raise ValueError("Warning: theta.json is corrupted or invalid.")
-
-
-def estimate_price(mileage, theta0, theta1):
-    """Calcule le prix estimé pour un kilométrage donné"""
-    return theta0 + (theta1 * mileage)
 
 
 def main():

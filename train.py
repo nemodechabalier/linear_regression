@@ -1,8 +1,10 @@
 # /home/nde-chab/Documents/Artificial_intelligence/Piscine-Pyhton/ex00/load_csv.py
 import pandas as pd
 from pandas import DataFrame
+import matplotlib.pyplot as plt
 import json
 import csv
+from utils import estimate_price, calculate_r_squared
 
 
 def load(path: str):
@@ -35,12 +37,6 @@ def load(path: str):
         ValueError(f"Error: {e}")
 
     return mileages, prices
-
-
-def estimate_value(theta0: float, theta1: float, mileage: float):
-    """doc"""
-    return theta0 + theta1 * mileage
-
 
 def normalize_data(data):
     """Normalise les données entre 0 et 1"""
@@ -79,14 +75,17 @@ def train(mileages, prices, learning_rate=0.1, iteration=10000):
     print(f"Price range: [{price_min:.0f}, {price_max:.0f}]\n")
     theta0_evolution = []
     theta1_evolution = []
+    r2_evolution = []
+    print(f"mileages: {mileages}\nnormalized mileages: {norm_mileages}\n")
+    print(f"price {prices}\nnormalized prices: {norm_prices}\n")
 
     for i in range(iteration):
         sum_error_theta0 = 0.0
         sum_error_theta1 = 0.0
 
         for j in range(m):
-            estimate_price = estimate_value(theta0, theta1, norm_mileages[j])
-            error = estimate_price - norm_prices[j]
+            estimate_price_value = estimate_price(norm_mileages[j], theta0, theta1)
+            error = estimate_price_value - norm_prices[j]
 
             sum_error_theta0 += error
             sum_error_theta1 += error * norm_mileages[j]
@@ -105,7 +104,8 @@ def train(mileages, prices, learning_rate=0.1, iteration=10000):
             theta0, theta1, km_min, km_max, price_min, price_max)
             theta0_evolution.append(real_theta0)
             theta1_evolution.append(real_theta1)
-
+            r2 = calculate_r_squared(mileages, prices, real_theta0, real_theta1)
+            r2_evolution.append(r2)
 
     # Dénormaliser les theta pour les sauvegarder
     real_theta0, real_theta1 = denormalize_theta(
@@ -115,30 +115,45 @@ def train(mileages, prices, learning_rate=0.1, iteration=10000):
     print(f"\nNormalized θ0 = {theta0:.6f}, θ1 = {theta1:.6f}")
     print(f"Denormalized θ0 = {real_theta0:.2f}, θ1 = {real_theta1:.6f}")
 
-    return real_theta0, real_theta1, theta0_evolution, theta1_evolution
+    return real_theta0, real_theta1, theta0_evolution, theta1_evolution, r2_evolution
 
+def plot_training(theta0_evolution, theta1_evolution, r2_evolution):
+    iters = [i * 100 for i in range(1, len(theta0_evolution) + 1)]
+
+    fig, axes = plt.subplots(3, 1, figsize=(8, 8), sharex=True)
+
+    axes[0].plot(iters, theta0_evolution)
+    axes[0].set_ylabel("theta0")
+
+    axes[1].plot(iters, theta1_evolution)
+    axes[1].set_ylabel("theta1")
+
+    axes[2].plot(iters, r2_evolution)
+    axes[2].set_ylabel("R²")
+    axes[2].set_xlabel("Itération")
+
+    plt.tight_layout()
+    plt.show()
 
 def save_theta(theta0, theta1, filepath='theta.json'):
     """Sauvegarde les paramètres theta dans le fichier JSON"""
-    data = {
-        "theta0": theta0,
-        "theta1": theta1
-    }
-
+    try :
+        data = {
+            "theta0": theta0,
+            "theta1": theta1
+        }
+    except Exception as e:
+        raise ValueError(f"Error {e}")
     with open(filepath, 'w') as file:
         json.dump(data, file, indent=2)
 
     print(f"\nParameters saved to {filepath}")
 
-
 def main():
     mileages, prices = load("data.csv")
-    print(mileages, prices)
-    theta0, theta1, theta0_evolution, theta1_evolution = train(mileages, prices)
-    print(f"theta0 = {theta0}, theta1 = {theta1}")
+    theta0, theta1, theta0_evolution, theta1_evolution, r2_evolution = train(mileages, prices)
     save_theta(theta0, theta1)
-    print(theta0_evolution)
-    print(theta1_evolution)
+    plot_training(theta0_evolution, theta1_evolution, r2_evolution)
 
 
 
