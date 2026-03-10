@@ -39,7 +39,21 @@ def load(path: str):
     return mileages, prices
 
 def normalize_data(data):
-    """Normalise les données entre 0 et 1"""
+    """
+    Normalize data to a range between 0 and 1.
+
+    Uses min-max normalization to scale the data, which helps
+    gradient descent converge faster and more reliably.
+
+    Args:
+        data (list): List of numeric values to normalize.
+
+    Returns:
+        tuple: A tuple containing:
+            - normalized (list): The normalized values between 0 and 1.
+            - min_val (float): The minimum value from the original data.
+            - max_val (float): The maximum value from the original data.
+    """
     min_val = min(data)
     max_val = max(data)
     range_val = max_val - min_val
@@ -49,7 +63,23 @@ def normalize_data(data):
 
 
 def denormalize_theta(theta0, theta1, km_min, km_max, price_min, price_max):
-    """Dénormalise les theta pour les utiliser avec les vraies données"""
+    """
+    Convert normalized theta values back to their original scale.
+
+    After training on normalized data, the theta parameters need to be
+    denormalized to make predictions on real (non-normalized) data.
+
+    Args:
+        theta0 (float): The normalized intercept parameter.
+        theta1 (float): The normalized slope parameter.
+        km_min (float): Minimum mileage value from training data.
+        km_max (float): Maximum mileage value from training data.
+        price_min (float): Minimum price value from training data.
+        price_max (float): Maximum price value from training data.
+
+    Returns:
+        tuple: A tuple containing (real_theta0, real_theta1) in original scale.
+    """
     km_range = km_max - km_min
     price_range = price_max - price_min
 
@@ -61,7 +91,27 @@ def denormalize_theta(theta0, theta1, km_min, km_max, price_min, price_max):
 
 
 def train(mileages, prices, learning_rate=0.1, iteration=10000):
-    """doc"""
+    """
+    Train the linear regression model using gradient descent.
+
+    Implements batch gradient descent to find optimal theta0 (intercept)
+    and theta1 (slope) parameters that minimize the cost function.
+    Data is normalized during training for better convergence.
+
+    Args:
+        mileages (list): List of car mileages (features).
+        prices (list): List of corresponding car prices (targets).
+        learning_rate (float, optional): Step size for gradient descent. Defaults to 0.1.
+        iteration (int, optional): Number of training iterations. Defaults to 10000.
+
+    Returns:
+        tuple: A tuple containing:
+            - real_theta0 (float): Trained intercept parameter (denormalized).
+            - real_theta1 (float): Trained slope parameter (denormalized).
+            - theta0_evolution (list): History of theta0 values during training.
+            - theta1_evolution (list): History of theta1 values during training.
+            - r2_evolution (list): History of R² scores during training.
+    """
     # Normaliser les données
     norm_mileages, km_min, km_max = normalize_data(mileages)
     norm_prices, price_min, price_max = normalize_data(prices)
@@ -118,6 +168,18 @@ def train(mileages, prices, learning_rate=0.1, iteration=10000):
     return real_theta0, real_theta1, theta0_evolution, theta1_evolution, r2_evolution
 
 def plot_training(theta0_evolution, theta1_evolution, r2_evolution):
+    """
+    Plot the evolution of parameters and R² score during training.
+
+    Creates a 3-subplot figure showing how theta0, theta1, and the
+    R² coefficient evolve over iterations, useful for monitoring
+    gradient descent convergence.
+
+    Args:
+        theta0_evolution (list): History of theta0 values.
+        theta1_evolution (list): History of theta1 values.
+        r2_evolution (list): History of R² scores.
+    """
     iters = [i * 100 for i in range(1, len(theta0_evolution) + 1)]
 
     fig, axes = plt.subplots(3, 1, figsize=(8, 8), sharex=True)
@@ -136,7 +198,20 @@ def plot_training(theta0_evolution, theta1_evolution, r2_evolution):
     plt.show()
 
 def save_theta(theta0, theta1, filepath='theta.json'):
-    """Sauvegarde les paramètres theta dans le fichier JSON"""
+    """
+    Save trained theta parameters to a JSON file.
+
+    Persists the model parameters to disk so they can be loaded
+    later for making predictions without retraining.
+
+    Args:
+        theta0 (float): The intercept parameter to save.
+        theta1 (float): The slope parameter to save.
+        filepath (str, optional): Path to the output file. Defaults to 'theta.json'.
+
+    Raises:
+        ValueError: If an error occurs during data preparation.
+    """
     try :
         data = {
             "theta0": theta0,
@@ -150,6 +225,12 @@ def save_theta(theta0, theta1, filepath='theta.json'):
     print(f"\nParameters saved to {filepath}")
 
 def main():
+    """
+    Main entry point for training the linear regression model.
+
+    Loads data from CSV, trains the model using gradient descent,
+    saves the learned parameters, and displays training progress plots.
+    """
     mileages, prices = load("data.csv")
     theta0, theta1, theta0_evolution, theta1_evolution, r2_evolution = train(mileages, prices)
     save_theta(theta0, theta1)

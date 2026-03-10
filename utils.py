@@ -1,16 +1,42 @@
 
 
 def estimate_price(mileage, theta0, theta1):
-    """Calcule le prix estimé pour un kilométrage donné"""
+    """
+    Estimate the price of a car based on its mileage.
+
+    Uses the linear regression formula: price = theta0 + (theta1 * mileage)
+    where theta0 is the intercept and theta1 is the slope.
+
+    Args:
+        mileage (float): The car's mileage in kilometers.
+        theta0 (float): The intercept parameter of the model.
+        theta1 (float): The slope parameter of the model.
+
+    Returns:
+        float: The estimated price of the car.
+    """
     return theta0 + (theta1 * mileage)
 
 def calculate_r_squared(mileages, prices, theta0, theta1):
     """
-    Calcule le coefficient R² (coefficient de détermination)
-    R² = 1 - (SS_res / SS_tot)
+    Calculate the R² (coefficient of determination) score.
 
-    R² proche de 1 = bon modèle
-    R² proche de 0 = mauvais modèle
+    R² measures how well the regression line fits the data.
+    Formula: R² = 1 - (SS_res / SS_tot)
+
+    Interpretation:
+        - R² close to 1: Excellent model fit
+        - R² close to 0: Poor model fit
+        - R² can be negative if model performs worse than mean prediction
+
+    Args:
+        mileages (list): List of car mileages.
+        prices (list): List of actual car prices.
+        theta0 (float): The intercept parameter of the model.
+        theta1 (float): The slope parameter of the model.
+
+    Returns:
+        float: The R² score between 0 and 1 (ideally).
     """
     # Moyenne des prix réels
     mean_price = sum(prices) / len(prices)

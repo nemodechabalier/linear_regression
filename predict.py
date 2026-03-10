@@ -4,7 +4,19 @@ from utils import estimate_price
 
 
 def load_theta():
-    """Charge les paramètres theta depuis le fichier JSON"""
+    """
+    Load theta parameters from the JSON file.
+
+    Reads the trained model parameters (theta0 and theta1) from theta.json.
+    These parameters are used to make price predictions based on mileage.
+
+    Returns:
+        tuple: A tuple containing (theta0, theta1) values.
+
+    Raises:
+        NameError: If the theta.json file does not exist.
+        ValueError: If the JSON file is corrupted or has invalid format.
+    """
     filepath = 'theta.json'
 
     # Si le fichier n'existe pas, retourner valeurs par défaut
@@ -19,6 +31,13 @@ def load_theta():
 
 
 def main():
+    """
+    Main entry point for the price prediction program.
+
+    Prompts the user to enter a car mileage and displays the estimated
+    price based on the trained linear regression model. Handles input
+    validation for negative values and non-numeric inputs.
+    """
     theta0, theta1 = load_theta()
 
     try:

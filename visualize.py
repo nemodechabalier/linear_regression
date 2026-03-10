@@ -6,7 +6,18 @@ import numpy as np
 
 
 def load_theta():
-    """Charge les paramètres theta depuis le fichier JSON"""
+    """
+    Load theta parameters from the JSON file.
+
+    Reads the trained model parameters (theta0 and theta1) from theta.json.
+
+    Returns:
+        tuple: A tuple containing (theta0, theta1) values.
+
+    Raises:
+        NameError: If the theta.json file does not exist.
+        ValueError: If the JSON file is corrupted or has invalid format.
+    """
     filepath = 'theta.json'
 
     if not os.path.exists(filepath):
@@ -48,17 +59,37 @@ def load(path: str):
 
 
 def estimate_price(mileage, theta0, theta1):
-    """Calcule le prix estimé pour un kilométrage donné"""
+    """
+    Estimate the price of a car based on its mileage.
+
+    Uses the linear regression formula: price = theta0 + (theta1 * mileage).
+
+    Args:
+        mileage (float): The car's mileage in kilometers.
+        theta0 (float): The intercept parameter of the model.
+        theta1 (float): The slope parameter of the model.
+
+    Returns:
+        float: The estimated price of the car.
+    """
     return theta0 + (theta1 * mileage)
 
 
 def calculate_r_squared(mileages, prices, theta0, theta1):
     """
-    Calcule le coefficient R² (coefficient de détermination)
-    R² = 1 - (SS_res / SS_tot)
+    Calculate the R² (coefficient of determination) score.
 
-    R² proche de 1 = bon modèle
-    R² proche de 0 = mauvais modèle
+    R² measures how well the regression line fits the data.
+    Formula: R² = 1 - (SS_res / SS_tot)
+
+    Args:
+        mileages (list): List of car mileages.
+        prices (list): List of actual car prices.
+        theta0 (float): The intercept parameter of the model.
+        theta1 (float): The slope parameter of the model.
+
+    Returns:
+        float: The R² score (1 = perfect fit, 0 = poor fit).
     """
     mean_price = sum(prices) / len(prices)
 
@@ -75,7 +106,21 @@ def calculate_r_squared(mileages, prices, theta0, theta1):
 
 
 def calculate_mse(mileages, prices, theta0, theta1):
-    """Calcule l'erreur quadratique moyenne (Mean Squared Error)"""
+    """
+    Calculate the Mean Squared Error (MSE) of the model.
+
+    MSE is the average of squared differences between predicted
+    and actual values. Lower values indicate better model performance.
+
+    Args:
+        mileages (list): List of car mileages.
+        prices (list): List of actual car prices.
+        theta0 (float): The intercept parameter of the model.
+        theta1 (float): The slope parameter of the model.
+
+    Returns:
+        float: The mean squared error value.
+    """
     mse = 0
     for i in range(len(mileages)):
         prediction = estimate_price(mileages[i], theta0, theta1)
@@ -86,7 +131,21 @@ def calculate_mse(mileages, prices, theta0, theta1):
 
 
 def calculate_mae(mileages, prices, theta0, theta1):
-    """Calcule l'erreur absolue moyenne (Mean Absolute Error)"""
+    """
+    Calculate the Mean Absolute Error (MAE) of the model.
+
+    MAE is the average of absolute differences between predicted
+    and actual values. It represents the average prediction error in euros.
+
+    Args:
+        mileages (list): List of car mileages.
+        prices (list): List of actual car prices.
+        theta0 (float): The intercept parameter of the model.
+        theta1 (float): The slope parameter of the model.
+
+    Returns:
+        float: The mean absolute error value in euros.
+    """
     mae = 0
     for i in range(len(mileages)):
         prediction = estimate_price(mileages[i], theta0, theta1)
@@ -98,7 +157,17 @@ def calculate_mae(mileages, prices, theta0, theta1):
 
 def plot_data_and_regression(mileages, prices, theta0, theta1):
     """
-    Affiche les données et la ligne de régression
+    Create a visualization of the data points and regression line.
+
+    Displays a scatter plot of the actual data points with the fitted
+    regression line overlaid. Includes error lines for sample points
+    and a text box showing the model equation and metrics.
+
+    Args:
+        mileages (list): List of car mileages.
+        prices (list): List of actual car prices.
+        theta0 (float): The intercept parameter of the model.
+        theta1 (float): The slope parameter of the model.
     """
     plt.figure(figsize=(12, 7))
 
@@ -145,7 +214,18 @@ def plot_data_and_regression(mileages, prices, theta0, theta1):
 
 
 def print_precision_metrics(mileages, prices, theta0, theta1):
-    """Affiche les métriques de précision du modèle"""
+    """
+    Display comprehensive precision metrics for the model.
+
+    Prints R² score, MSE, RMSE, and MAE with interpretations.
+    Also shows sample predictions for common mileage values.
+
+    Args:
+        mileages (list): List of car mileages.
+        prices (list): List of actual car prices.
+        theta0 (float): The intercept parameter of the model.
+        theta1 (float): The slope parameter of the model.
+    """
     print("\n" + "="*60)
     print("MODEL PRECISION METRICS")
     print("="*60)
@@ -185,7 +265,11 @@ def print_precision_metrics(mileages, prices, theta0, theta1):
 
 def main():
     """
-    Visualise les données, la régression linéaire et calcule la précision
+    Main entry point for the visualization program.
+
+    Loads the training data and model parameters, displays precision
+    metrics in the console, and creates a graphical visualization
+    of the linear regression results.
     """
     try:
         print("Loading data from data.csv...")
